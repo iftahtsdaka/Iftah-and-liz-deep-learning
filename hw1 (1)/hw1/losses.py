@@ -39,9 +39,6 @@ class SVMHingeLoss(ClassifierLoss):
         :return: The classification loss as a Tensor of shape (1,).
         """
 
-        assert x_scores.shape[0] == y.shape[0]
-        assert y.dim() == 1
-
         # TODO: Implement SVM loss calculation based on the hinge-loss formula.
         #  Notes:
         #  - Use only basic pytorch tensor operations, no external code.
@@ -50,16 +47,19 @@ class SVMHingeLoss(ClassifierLoss):
         #    Hint: Create a matrix M where M[i,j] is the margin-loss
         #    for sample i and class j (i.e. s_j - s_{y_i} + delta).
 
-        loss = None
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
-        # ========================
+        assert x_scores.shape[0] == y.shape[0]
+        assert y.dim() == 1
 
-        # TODO: Save what you need for gradient calculation in self.grad_ctx
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
-        # ========================
+        N = x.shape[0]
+        correct_scores = x_scores[torch.arange(N), y].view(-1, 1)
+        margins = x_scores - correct_scores + self.delta
+        margins[torch.arange(N), y] = 0
+        margins = torch.clamp(margins, min=0)
+        loss = torch.mean(torch.sum(margins, dim=1, keepdim=True))
 
+        self.grad_ctx["x"] = x
+        self.grad_ctx["y"] = y
+        self.grad_ctx["margins"] = margins
         return loss
 
     def grad(self):
@@ -73,9 +73,13 @@ class SVMHingeLoss(ClassifierLoss):
         #  Same notes as above. Hint: Use the matrix M from above, based on
         #  it create a matrix G such that X^T * G is the gradient.
 
-        grad = None
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
-        # ========================
+        x = self.grad_ctx["x"]
+        y = self.grad_ctx["y"]
+        margins = self.grad_ctx["margins"]
 
+        N = x.shape[0]
+        binary = (margins > 0).float()
+        row_sum = torch.sum(binary, dim=1)
+        binary[torch.arange(N), y] = -row_sum
+        grad = x.T.mm(binary) / N
         return grad
