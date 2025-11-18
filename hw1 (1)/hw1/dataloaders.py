@@ -69,20 +69,26 @@ def create_train_validation_loaders(
     # ====== YOUR CODE: ======
     total_size = len(dataset)
     valid_size = int(math.floor(total_size * validation_ratio))
-    train_size = total_size - valid_size
 
     indices = np.random.permutation(total_size)
-    valid_indices = indices[:valid_size]
     train_indices = indices[valid_size:]
+    valid_indices = indices[:valid_size]
 
     train_sampler = SubsetRandomSampler(train_indices)
     valid_sampler = SubsetRandomSampler(valid_indices)
 
     dl_train = DataLoader(
-        dataset, batch_size=batch_size, sampler=train_sampler, num_workers=num_workers
+        dataset,
+        batch_size=batch_size,
+        sampler=train_sampler,
+        num_workers=num_workers
     )
+
     dl_valid = DataLoader(
-        dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=num_workers
+        dataset,
+        batch_size=batch_size,
+        sampler=valid_sampler,
+        num_workers=num_workers
     )
     # ========================
 

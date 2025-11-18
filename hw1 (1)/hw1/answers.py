@@ -119,15 +119,12 @@ part2_q3 = r"""
 
 
 
-(2) The training and validation accuracy curves rise together and stay close throughout training, without a large gap between them. 
-This means the model generalizes well to unseen data, so it is not overfitted.
-
-However, since the validation accuracy remains slightly below the training accuracy, 
-it indicates that the model still performs a bit better on the data it has already seen. 
-This small gap means the model hasn’t fully captured all the underlying structure in the data.
-
-This indicates slight underfitting: the model could potentially perform better with a more complex architecture or longer training, but it already generalizes well and is not overfitting.
-
+(2) The model is slightly overfitted. The training and validation accuracy
+curves are close, which means the model generalizes well, but the
+training accuracy is consistently a bit higher than the validation
+accuracy. This small but consistent gap indicates mild overfitting.
+There is no sign of severe overfitting (large gap) or underfitting
+(both accuracies staying low).
 """
 
 # ==============

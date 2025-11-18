@@ -88,6 +88,7 @@ class LinearClassifier(object):
         valid_res = Result(accuracy=[], loss=[])
 
         print("Training", end="")
+        initial_lr = learn_rate
         for epoch_idx in range(max_epochs):
             # TODO:
             #  Implement model training loop.
@@ -101,41 +102,46 @@ class LinearClassifier(object):
             #     using the weight_decay parameter.
 
             # ====== YOUR CODE: ======
-            self.weights.requires_grad = False
-            total_loss, total_correct, total_samples = 0.0, 0, 0
+            epoch_loss = 0.0
+            epoch_correct = 0
+            epoch_total = 0
+
             for xb, yb in dl_train:
                 y_pred, scores = self.predict(xb)
 
                 loss = loss_fn(xb, yb, scores, y_pred)
-                reg_loss = 0.5 * weight_decay * torch.sum(self.weights ** 2)
-                total = loss + reg_loss
 
-                grad = loss_fn.grad() + weight_decay * self.weights
+                loss = loss + 0.5 * weight_decay * torch.sum(self.weights ** 2)
 
-                self.weights -= learn_rate * grad
+                grad = loss_fn.grad()
+                grad = grad + weight_decay * self.weights
+                grad = grad.detach()
 
-                total_loss += total.item() * xb.shape[0]
-                total_correct += (y_pred == yb).sum().item()
-                total_samples += xb.shape[0]
+                current_lr = initial_lr * (0.95 ** epoch_idx)
+                self.weights -= current_lr * grad
 
-            train_loss = total_loss / total_samples
-            train_acc = 100.0 * total_correct / total_samples
-            train_res.loss.append(train_loss)
-            train_res.accuracy.append(train_acc)
+                epoch_loss += loss.item() * xb.size(0)
+                epoch_correct += (y_pred == yb).sum().item()
+                epoch_total += xb.size(0)
 
-            total_loss, total_correct, total_samples = 0.0, 0, 0
+            train_res.loss.append(epoch_loss / epoch_total)
+            train_res.accuracy.append(100.0 * epoch_correct / epoch_total)
+
             with torch.no_grad():
+                val_loss = 0.0
+                val_correct = 0
+                val_samples = 0
+
                 for xb, yb in dl_valid:
                     y_pred, scores = self.predict(xb)
                     loss = loss_fn(xb, yb, scores, y_pred)
-                    total_loss += loss.item() * xb.shape[0]
-                    total_correct += (y_pred == yb).sum().item()
-                    total_samples += xb.shape[0]
 
-            valid_loss = total_loss / total_samples
-            valid_acc = 100.0 * total_correct / total_samples
-            valid_res.loss.append(valid_loss)
-            valid_res.accuracy.append(valid_acc)
+                    val_loss += loss.item() * xb.size(0)
+                    val_correct += (y_pred == yb).sum().item()
+                    val_samples += xb.size(0)
+
+            valid_res.loss.append(val_loss / val_samples)
+            valid_res.accuracy.append(100.0 * val_correct / val_samples)
 
             print(".", end="")
 
@@ -172,7 +178,7 @@ def hyperparams():
     #  Manually tune the hyperparameters to get the training accuracy test
     #  to pass.
     # ====== YOUR CODE: ======
-    hp = dict(weight_std=0.001, learn_rate=0.1, weight_decay=0.001)
+    hp = dict(weight_std=0.01, learn_rate=0.05, weight_decay=0.001)
     # ========================
 
     return hp
