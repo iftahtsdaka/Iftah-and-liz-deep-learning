@@ -39,7 +39,10 @@ An equation: $e^{i\pi} -1 = 0$
 """
 
 part1_q2 = r"""
-**No. This is a terrible idea! Using the test set to pick the best parameters would lead to overfitting as the test-error is no longer "error on unseen data".**
+**No. This is a terrible idea! Basically they are using the test set as a validation set - while it woud still produce
+ a model that "might" generalize well, in order to actually measure generalization error,
+we need to use a new separate test set. Using the test set for to pick the best parameters would lead to 
+overfitting as the test-error is no longer "error on unseen data" and the test error to be unrepresentative of the generalization error.**
 
 Write your answer using **markdown** and $\LaTeX$:
 ```python
@@ -224,7 +227,7 @@ $$\mathbb{E}_{x,y}[|y-x|] = \int_0^1 \left(x^2 - x + \frac{1}{2}\right) dx = \le
 
 **2. What is the expected value $\mathbb{E}_{x}[|\hat{x}-x|]$? Answer should be a polynomial of $\hat{x}$.**
 
-Very similar to the previous calculation, but now we treat $\hat{x}$ as a fixed value.
+Exactly like the begining of the previous calculation, but $\hat(x)$ is fixed.
 
 $$\mathbb{E}_{x}[|\hat{x}-x|] = \int_0^1 |\hat{x}-x| \, dx$$
 
@@ -238,7 +241,7 @@ Therefore:
 
 $$\mathbb{E}_{x}[|\hat{x}-x|] = \frac{\hat{x}^2}{2} + \frac{1}{2} - \hat{x} + \frac{\hat{x}^2}{2} = \hat{x}^2 - \hat{x} + \frac{1}{2}$$
 
-And if $\hat{x} \ is an estimator s.t it is between 0 and 1 this answer stands. However, if $\hat{x}$ is not between 0 and 1, we need to consider the other cases.
+And if $\hat{x}$ is an estimator s.t it is between 0 and 1 this answer stands. However, if $\hat{x}$ is not between 0 and 1, we need to consider the other cases.
 
 **Case 2: $\hat{x} < 0$**
 
